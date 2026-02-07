@@ -373,12 +373,12 @@ export default function TimezoneClock() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [ringAssignments, setRingAssignments] = useState({
-    outer: 'london',
+    outer: 'dallas',
     middle: 'connecticut',
-    inner: 'dallas'
+    inner: 'london'
   });
   const [currentTheme, setCurrentTheme] = useState('minimalist');
-  const [mode, setMode] = useState('light');
+  const [mode, setMode] = useState('dark');
 
   // Get active theme colors
   const theme = THEMES[currentTheme][mode];
@@ -461,23 +461,8 @@ export default function TimezoneClock() {
     const startAngle = getHourAngle(referenceHour);
     const endAngle = getHourAngle(referenceHour + 1);
 
-    // Check if each timezone is working
-    const dallasWorking = isTimezoneWorking(referenceHour, referenceTz, 'dallas');
-    const connecticutWorking = isTimezoneWorking(referenceHour, referenceTz, 'connecticut');
-    const londonWorking = isTimezoneWorking(referenceHour, referenceTz, 'london');
-    const fullOverlap = isFullOverlap(referenceHour, referenceTz);
-
-    // Color based on which timezone is assigned to this ring
-    let fill = theme.segmentDefault;
-    if (fullOverlap) {
-      fill = theme.segmentOverlap;
-    } else if (timezone === 'dallas' && dallasWorking) {
-      fill = theme.segmentDallas;
-    } else if (timezone === 'connecticut' && connecticutWorking) {
-      fill = theme.segmentConnecticut;
-    } else if (timezone === 'london' && londonWorking) {
-      fill = theme.segmentLondon;
-    }
+    // Use default segment color for all hours
+    const fill = theme.segmentDefault;
 
     const midAngle = (startAngle + endAngle) / 2;
     const labelR = (outerR + innerR) / 2;
@@ -562,7 +547,7 @@ export default function TimezoneClock() {
       );
     };
 
-    const lineInner = polarToCartesian(200, 200, 70, exactAngle);
+    const lineInner = polarToCartesian(200, 200, 54, exactAngle);
     const lineOuter = polarToCartesian(200, 200, 192, exactAngle);
 
     return (
@@ -575,8 +560,8 @@ export default function TimezoneClock() {
           y1={lineInner.y}
           x2={lineOuter.x}
           y2={lineOuter.y}
-          stroke={theme.nowLine}
-          strokeWidth="2"
+          stroke="#ec4899"
+          strokeWidth="3"
           strokeLinecap="round"
           style={{ pointerEvents: 'none' }}
         />
@@ -604,27 +589,31 @@ export default function TimezoneClock() {
 
   return (
     <div
-      className="min-h-screen p-4 flex flex-col items-center"
+      className="min-h-screen h-screen flex flex-col overflow-auto"
       style={{
         backgroundColor: theme.background,
         transition: 'all 0.3s ease'
       }}
     >
-      <h1
-        className="text-2xl font-light mb-1"
-        style={{ color: theme.textPrimary }}
-      >
-        Timezone Meeting Clock
-      </h1>
-      <p
-        className="text-sm mb-3"
-        style={{ color: theme.textSecondary }}
-      >
-        {ringAssignments.outer.charAt(0).toUpperCase() + ringAssignments.outer.slice(1)} (Outer) • {ringAssignments.middle.charAt(0).toUpperCase() + ringAssignments.middle.slice(1)} (Middle) • {ringAssignments.inner.charAt(0).toUpperCase() + ringAssignments.inner.slice(1)} (Inner)
-      </p>
+      {/* Header Section */}
+      <div className="flex justify-between items-center px-8 py-4 border-b" style={{ borderColor: theme.cardBorder }}>
+        <div>
+          <h1
+            className="text-3xl font-light mb-1"
+            style={{ color: theme.textPrimary }}
+          >
+            Timezone Meeting Clock
+          </h1>
+          <p
+            className="text-sm"
+            style={{ color: theme.textSecondary }}
+          >
+            {ringAssignments.outer.charAt(0).toUpperCase() + ringAssignments.outer.slice(1)} (Outer) • {ringAssignments.middle.charAt(0).toUpperCase() + ringAssignments.middle.slice(1)} (Middle) • {ringAssignments.inner.charAt(0).toUpperCase() + ringAssignments.inner.slice(1)} (Inner)
+          </p>
+        </div>
 
-      {/* Theme Selector and Light/Dark Toggle */}
-      <div className="flex gap-6 mb-4 items-center justify-center">
+        {/* Theme Selector and Light/Dark Toggle */}
+        <div className="flex gap-6 items-center">
         {/* Theme Selector */}
         <div className="flex gap-2">
           {Object.entries(THEME_NAMES).map(([key, name]) => (
@@ -672,9 +661,11 @@ export default function TimezoneClock() {
             }}
           />
         </button>
+        </div>
       </div>
 
-      <div className="flex gap-4 mb-4 items-center justify-center">
+      {/* Controls Section */}
+      <div className="flex justify-center gap-4 items-center px-8 py-4 border-b" style={{ borderColor: theme.cardBorder }}>
         <div>
           <label
             className="text-xs block mb-1"
@@ -754,51 +745,11 @@ export default function TimezoneClock() {
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-3 mb-4 text-xs">
-        <div className="flex items-center gap-1">
-          <div
-            className="w-3 h-3 rounded"
-            style={{
-              backgroundColor: theme.segmentOverlap,
-              border: `1px solid ${theme.segmentOverlap}`,
-              opacity: 0.8
-            }}
-          ></div>
-          <span style={{ color: theme.textSecondary }}>All Overlap</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div
-            className="w-3 h-3 rounded"
-            style={{
-              backgroundColor: theme.segmentDallas,
-              border: `1px solid ${theme.segmentDallas}`
-            }}
-          ></div>
-          <span style={{ color: theme.textSecondary }}>Dallas</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div
-            className="w-3 h-3 rounded"
-            style={{
-              backgroundColor: theme.segmentConnecticut,
-              border: `1px solid ${theme.segmentConnecticut}`
-            }}
-          ></div>
-          <span style={{ color: theme.textSecondary }}>Connecticut</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div
-            className="w-3 h-3 rounded"
-            style={{
-              backgroundColor: theme.segmentLondon,
-              border: `1px solid ${theme.segmentLondon}`
-            }}
-          ></div>
-          <span style={{ color: theme.textSecondary }}>London</span>
-        </div>
-      </div>
-
-      <svg width="400" height="400" viewBox="0 0 400 400" className="drop-shadow-lg">
+      {/* Main Content Area */}
+      <div className="flex-1 flex items-center justify-center gap-8 px-8 py-8 overflow-auto">
+        {/* Clock */}
+        <div className="flex-shrink-0">
+          <svg width="600" height="600" viewBox="0 0 400 400" className="drop-shadow-lg">
         <circle
           cx="200"
           cy="200"
@@ -844,25 +795,25 @@ export default function TimezoneClock() {
         <circle
           cx="200"
           cy="200"
-          r="40"
+          r="54"
           fill={theme.centerCircleBg}
-          stroke={theme.centerCircleBorder}
-          strokeWidth="2"
+          stroke="#ec4899"
+          strokeWidth="3"
         />
         <text
           x="200"
-          y="188"
+          y="178"
           textAnchor="middle"
-          fontSize="8"
+          fontSize="9"
           fill={theme.textMuted}
         >
           NOW
         </text>
         <text
           x="200"
-          y="200"
+          y="196"
           textAnchor="middle"
-          fontSize="9"
+          fontSize="11"
           fontWeight="600"
           fill={theme.clockTextOuter}
         >
@@ -870,9 +821,9 @@ export default function TimezoneClock() {
         </text>
         <text
           x="200"
-          y="211"
+          y="210"
           textAnchor="middle"
-          fontSize="9"
+          fontSize="11"
           fontWeight="600"
           fill={theme.clockTextMiddle}
         >
@@ -880,38 +831,97 @@ export default function TimezoneClock() {
         </text>
         <text
           x="200"
-          y="222"
+          y="224"
           textAnchor="middle"
-          fontSize="9"
+          fontSize="11"
           fontWeight="600"
           fill={theme.clockTextInner}
         >
           {String(Math.floor(getCurrentHour(ringAssignments.inner))).padStart(2, '0')}:{String(currentTime.getUTCMinutes()).padStart(2, '0')} {ringAssignments.inner.slice(0, 3).toUpperCase()}
         </text>
+          </svg>
+        </div>
 
-        {/* Top label */}
-        <text
-          x="200"
-          y="12"
-          textAnchor="middle"
-          fontSize="9"
-          fill={theme.clockTextTop}
-          fontWeight="600"
-        >
-          00 {ringAssignments.outer.slice(0, 3).toUpperCase()} / {String(convertTimezone(0, ringAssignments.outer, ringAssignments.middle)).padStart(2, '0')} {ringAssignments.middle.slice(0, 3).toUpperCase()} / {String(convertTimezone(0, ringAssignments.outer, ringAssignments.inner)).padStart(2, '0')} {ringAssignments.inner.slice(0, 3).toUpperCase()}
-        </text>
-      </svg>
+        {/* Info Panels */}
+        <div className="flex flex-col gap-4 w-full max-w-md">
+          {/* Overlap Summary */}
+          <div
+            className="p-4"
+            style={{
+              backgroundColor: theme.successBg,
+              border: `1px solid ${theme.successBorder}`,
+              borderRadius: '12px',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <h3
+              className="font-semibold text-sm mb-2"
+              style={{ color: theme.successTextDark }}
+            >
+              Full Overlap: {overlapSlots.length} hours available
+            </h3>
+            <p
+              className="text-xs"
+              style={{ color: theme.successText }}
+            >
+              {overlapSlots.map(h => `${String(h).padStart(2,'0')}:00`).join(', ')} {ringAssignments.outer.charAt(0).toUpperCase() + ringAssignments.outer.slice(1)}
+            </p>
+            <p
+              className="text-xs mt-2"
+              style={{ color: theme.successText }}
+            >
+              {meetingsInOverlap.length} meetings in overlap window
+            </p>
+          </div>
 
-      {selectedSlot && (
-        <div
-          className="mt-4 p-4 w-full max-w-md"
-          style={{
-            backgroundColor: theme.cardBg,
-            border: `1px solid ${theme.cardBorder}`,
-            borderRadius: '12px',
-            transition: 'all 0.3s ease'
-          }}
-        >
+          {meetingsOutsideOverlap.length > 0 && (
+            <div
+              className="p-4"
+              style={{
+                backgroundColor: theme.warningBg,
+                border: `1px solid ${theme.warningBorder}`,
+                borderRadius: '12px',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <h3
+                className="font-semibold text-sm mb-3"
+                style={{ color: theme.warningTextDark }}
+              >
+                ⚠ Meetings Outside Overlap
+              </h3>
+              {meetingsOutsideOverlap.map(m => {
+                const outerHour = getTimezoneHour(m.utcHour, ringAssignments.outer);
+                return (
+                  <div
+                    key={m.id}
+                    className="flex items-center justify-between text-sm py-2"
+                    style={{ color: theme.warningText }}
+                  >
+                    <span>{m.title} — {String(Math.floor(outerHour)).padStart(2,'0')}:00 {ringAssignments.outer.slice(0, 3).toUpperCase()}</span>
+                    <button
+                      onClick={() => removeMeeting(m.id)}
+                      className="text-xs"
+                      style={{ color: theme.warningTextDark, cursor: 'pointer' }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {selectedSlot && (
+            <div
+              className="p-4"
+              style={{
+                backgroundColor: theme.cardBg,
+                border: `1px solid ${theme.cardBorder}`,
+                borderRadius: '12px',
+                transition: 'all 0.3s ease'
+              }}
+            >
           <h3
             className="font-semibold mb-1"
             style={{ color: theme.textPrimary }}
@@ -995,76 +1005,9 @@ export default function TimezoneClock() {
           >
             + Add Meeting at This Time
           </button>
+            </div>
+          )}
         </div>
-      )}
-
-      <div className="mt-4 w-full max-w-md">
-        <div
-          className="p-3 mb-3"
-          style={{
-            backgroundColor: theme.successBg,
-            border: `1px solid ${theme.successBorder}`,
-            borderRadius: '12px',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          <h3
-            className="font-semibold text-sm mb-1"
-            style={{ color: theme.successTextDark }}
-          >
-            Full Overlap: {overlapSlots.length} hours available
-          </h3>
-          <p
-            className="text-xs"
-            style={{ color: theme.successText }}
-          >
-            {overlapSlots.map(h => `${String(h).padStart(2,'0')}:00`).join(', ')} {ringAssignments.outer.charAt(0).toUpperCase() + ringAssignments.outer.slice(1)}
-          </p>
-          <p
-            className="text-xs mt-1"
-            style={{ color: theme.successText }}
-          >
-            {meetingsInOverlap.length} meetings in overlap window
-          </p>
-        </div>
-
-        {meetingsOutsideOverlap.length > 0 && (
-          <div
-            className="p-3"
-            style={{
-              backgroundColor: theme.warningBg,
-              border: `1px solid ${theme.warningBorder}`,
-              borderRadius: '12px',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <h3
-              className="font-semibold text-sm mb-2"
-              style={{ color: theme.warningTextDark }}
-            >
-              ⚠ Meetings Outside Overlap
-            </h3>
-            {meetingsOutsideOverlap.map(m => {
-              const outerHour = getTimezoneHour(m.utcHour, ringAssignments.outer);
-              return (
-                <div
-                  key={m.id}
-                  className="flex items-center justify-between text-sm py-1"
-                  style={{ color: theme.warningText }}
-                >
-                  <span>{m.title} — {String(Math.floor(outerHour)).padStart(2,'0')}:00 {ringAssignments.outer.slice(0, 3).toUpperCase()}</span>
-                  <button
-                    onClick={() => removeMeeting(m.id)}
-                    className="text-xs"
-                    style={{ color: theme.warningTextDark, cursor: 'pointer' }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );
