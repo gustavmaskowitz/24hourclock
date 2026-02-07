@@ -477,7 +477,7 @@ export default function TimezoneClock() {
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
   };
 
-  const renderSegment = (referenceHour: number, outerR: number, innerR: number, ring: Ring, referenceTz: Timezone): JSX.Element => {
+  const renderSegment = (referenceHour: number, outerR: number, innerR: number, ring: Ring, referenceTz: Timezone) => {
     // ring is 'outer', 'middle', or 'inner'
     // referenceTz tells us which timezone the referenceHour represents
 
@@ -554,7 +554,7 @@ export default function TimezoneClock() {
     const currentOuterHourInt = Math.floor(currentOuterHour);
     const exactAngle = getHourAngle(currentOuterHour);
 
-    const renderOutline = (hour: number, outerR: number, innerR: number): JSX.Element => {
+    const renderOutline = (hour: number, outerR: number, innerR: number) => {
       const startAngle = getHourAngle(hour);
       const endAngle = getHourAngle(hour + 1);
 
@@ -648,7 +648,7 @@ export default function TimezoneClock() {
           {Object.entries(THEME_NAMES).map(([key, name]) => (
             <button
               key={key}
-              onClick={() => setCurrentTheme(key)}
+              onClick={() => setCurrentTheme(key as ThemeName)}
               style={{
                 backgroundColor: currentTheme === key ? theme.buttonPrimaryBg : theme.buttonSecondaryBg,
                 color: currentTheme === key ? theme.buttonPrimaryText : theme.textSecondary,
@@ -704,7 +704,7 @@ export default function TimezoneClock() {
           </label>
           <select
             value={ringAssignments.outer}
-            onChange={(e) => handleRingChange('outer', e.target.value)}
+            onChange={(e) => handleRingChange('outer', e.target.value as Timezone)}
             className="text-sm"
             style={{
               border: `1px solid ${theme.inputBorder}`,
@@ -730,7 +730,7 @@ export default function TimezoneClock() {
           </label>
           <select
             value={ringAssignments.middle}
-            onChange={(e) => handleRingChange('middle', e.target.value)}
+            onChange={(e) => handleRingChange('middle', e.target.value as Timezone)}
             className="text-sm"
             style={{
               border: `1px solid ${theme.inputBorder}`,
@@ -756,7 +756,7 @@ export default function TimezoneClock() {
           </label>
           <select
             value={ringAssignments.inner}
-            onChange={(e) => handleRingChange('inner', e.target.value)}
+            onChange={(e) => handleRingChange('inner', e.target.value as Timezone)}
             className="text-sm"
             style={{
               border: `1px solid ${theme.inputBorder}`,
