@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const WORK_START = 8;
+const WORK_START = 9;
 const WORK_END = 18;
 
 // UTC offsets for each timezone
@@ -461,8 +461,11 @@ export default function TimezoneClock() {
     const startAngle = getHourAngle(referenceHour);
     const endAngle = getHourAngle(referenceHour + 1);
 
-    // Use default segment color for all hours
-    const fill = theme.segmentDefault;
+    // Check if this ring's timezone is in working hours (09:00-18:00 local time)
+    const isWorkingHour = displayHour >= WORK_START && displayHour < WORK_END;
+
+    // Color segments green when this timezone is in working hours
+    const fill = isWorkingHour ? '#22c55e' : theme.segmentDefault;
 
     const midAngle = (startAngle + endAngle) / 2;
     const labelR = (outerR + innerR) / 2;
