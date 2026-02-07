@@ -1,11 +1,37 @@
 import { useState, useEffect } from 'react';
 
+// Type definitions
+type Timezone = 'dallas' | 'connecticut' | 'london';
+type Ring = 'outer' | 'middle' | 'inner';
+type ThemeName = 'minimalist' | 'bold' | 'professional' | 'playful';
+type Mode = 'light' | 'dark';
+
+interface Meeting {
+  id: number;
+  utcHour: number;
+  title: string;
+  essential: boolean;
+}
+
+interface SelectedSlot {
+  utcHour: number;
+  dallasHour: number;
+  connecticutHour: number;
+  londonHour: number;
+}
+
+interface RingAssignments {
+  outer: Timezone;
+  middle: Timezone;
+  inner: Timezone;
+}
+
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const WORK_START = 9;
 const WORK_END = 18;
 
 // UTC offsets for each timezone
-const TIMEZONE_OFFSETS = {
+const TIMEZONE_OFFSETS: Record<Timezone, number> = {
   dallas: -6,      // UTC-6
   connecticut: -5, // UTC-5
   london: 0        // UTC+0
@@ -367,18 +393,18 @@ const THEME_NAMES = {
 };
 
 export default function TimezoneClock() {
-  const [meetings, setMeetings] = useState([
+  const [meetings, setMeetings] = useState<Meeting[]>([
     { id: 1, utcHour: 16, title: 'Sync Call', essential: true }, // 16:00 UTC = 10:00 Dallas
   ]);
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [ringAssignments, setRingAssignments] = useState({
+  const [ringAssignments, setRingAssignments] = useState<RingAssignments>({
     outer: 'dallas',
     middle: 'connecticut',
     inner: 'london'
   });
-  const [currentTheme, setCurrentTheme] = useState('minimalist');
-  const [mode, setMode] = useState('dark');
+  const [currentTheme, setCurrentTheme] = useState<ThemeName>('minimalist');
+  const [mode, setMode] = useState<Mode>('dark');
 
   // Get active theme colors
   const theme = THEMES[currentTheme][mode];
@@ -391,13 +417,13 @@ export default function TimezoneClock() {
   const nowUTC = currentTime.getUTCHours() + currentTime.getUTCMinutes() / 60;
 
   // Convert from UTC to specific timezone
-  const getTimezoneHour = (utcHour, timezone) => {
+  const getTimezoneHour = (utcHour: number, timezone: Timezone): number => {
     const offset = TIMEZONE_OFFSETS[timezone];
     return (utcHour + offset + 24) % 24;
   };
 
   // Convert from one timezone to another
-  const convertTimezone = (hour, fromTz, toTz) => {
+  const convertTimezone = (hour: number, fromTz: Timezone, toTz: Timezone): number => {
     // Convert to UTC first
     const utcHour = (hour - TIMEZONE_OFFSETS[fromTz] + 24) % 24;
     // Then to target timezone
@@ -405,24 +431,24 @@ export default function TimezoneClock() {
   };
 
   // Get current time in a specific timezone
-  const getCurrentHour = (timezone) => {
+  const getCurrentHour = (timezone: Timezone): number => {
     return getTimezoneHour(nowUTC, timezone);
   };
 
-  const isWorkHour = (hour) => hour >= WORK_START && hour < WORK_END;
+  const isWorkHour = (hour: number): boolean => hour >= WORK_START && hour < WORK_END;
 
-  const isTimezoneWorking = (referenceHour, referenceTz, targetTz) => {
+  const isTimezoneWorking = (referenceHour: number, referenceTz: Timezone, targetTz: Timezone): boolean => {
     const targetHour = convertTimezone(referenceHour, referenceTz, targetTz);
     return isWorkHour(targetHour);
   };
 
-  const isFullOverlap = (referenceHour, referenceTz) => {
-    return ['dallas', 'connecticut', 'london'].every(tz =>
+  const isFullOverlap = (referenceHour: number, referenceTz: Timezone): boolean => {
+    return (['dallas', 'connecticut', 'london'] as Timezone[]).every(tz =>
       isTimezoneWorking(referenceHour, referenceTz, tz)
     );
   };
 
-  const handleRingChange = (ring, newTimezone) => {
+  const handleRingChange = (ring: Ring, newTimezone: Timezone): void => {
     // Find which ring currently has the new timezone
     const currentRingWithTimezone = Object.entries(ringAssignments).find(
       ([, tz]) => tz === newTimezone
@@ -444,14 +470,14 @@ export default function TimezoneClock() {
     }
   };
 
-  const getHourAngle = (hour) => (hour / 24) * 360 - 90;
+  const getHourAngle = (hour: number): number => (hour / 24) * 360 - 90;
 
-  const polarToCartesian = (cx, cy, r, angle) => {
+  const polarToCartesian = (cx: number, cy: number, r: number, angle: number): { x: number; y: number } => {
     const rad = (angle * Math.PI) / 180;
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
   };
 
-  const renderSegment = (referenceHour, outerR, innerR, ring, referenceTz) => {
+  const renderSegment = (referenceHour: number, outerR: number, innerR: number, ring: Ring, referenceTz: Timezone): JSX.Element => {
     // ring is 'outer', 'middle', or 'inner'
     // referenceTz tells us which timezone the referenceHour represents
 
@@ -528,7 +554,7 @@ export default function TimezoneClock() {
     const currentOuterHourInt = Math.floor(currentOuterHour);
     const exactAngle = getHourAngle(currentOuterHour);
 
-    const renderOutline = (hour, outerR, innerR) => {
+    const renderOutline = (hour: number, outerR: number, innerR: number): JSX.Element => {
       const startAngle = getHourAngle(hour);
       const endAngle = getHourAngle(hour + 1);
 
@@ -572,11 +598,11 @@ export default function TimezoneClock() {
     );
   };
 
-  const addMeeting = (utcHour, title, essential) => {
+  const addMeeting = (utcHour: number, title: string, essential: boolean): void => {
     setMeetings([...meetings, { id: Date.now(), utcHour, title, essential }]);
   };
 
-  const removeMeeting = (id) => {
+  const removeMeeting = (id: number): void => {
     setMeetings(meetings.filter(m => m.id !== id));
   };
 
