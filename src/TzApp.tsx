@@ -625,16 +625,16 @@ export default function TimezoneClock() {
       }}
     >
       {/* Header Section */}
-      <div className="flex justify-between items-center px-8 py-4 border-b" style={{ borderColor: theme.cardBorder }}>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-8 py-3 sm:py-4 border-b gap-2 sm:gap-0" style={{ borderColor: theme.cardBorder }}>
         <div>
           <h1
-            className="text-3xl font-light mb-1"
+            className="text-xl sm:text-3xl font-light mb-1"
             style={{ color: theme.textPrimary }}
           >
             Timezone Meeting Clock
           </h1>
           <p
-            className="text-sm"
+            className="text-xs sm:text-sm"
             style={{ color: theme.textSecondary }}
           >
             {ringAssignments.outer.charAt(0).toUpperCase() + ringAssignments.outer.slice(1)} (Outer) • {ringAssignments.middle.charAt(0).toUpperCase() + ringAssignments.middle.slice(1)} (Middle) • {ringAssignments.inner.charAt(0).toUpperCase() + ringAssignments.inner.slice(1)} (Inner)
@@ -642,9 +642,9 @@ export default function TimezoneClock() {
         </div>
 
         {/* Theme Selector and Light/Dark Toggle */}
-        <div className="flex gap-6 items-center">
+        <div className="flex gap-3 sm:gap-6 items-center">
         {/* Theme Selector */}
-        <div className="flex gap-2">
+        <div className="flex gap-1 sm:gap-2 flex-wrap">
           {Object.entries(THEME_NAMES).map(([key, name]) => (
             <button
               key={key}
@@ -652,13 +652,14 @@ export default function TimezoneClock() {
               style={{
                 backgroundColor: currentTheme === key ? theme.buttonPrimaryBg : theme.buttonSecondaryBg,
                 color: currentTheme === key ? theme.buttonPrimaryText : theme.textSecondary,
-                borderRadius: '8px',
-                padding: '6px 12px',
-                fontSize: '12px',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                fontSize: '10px',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease'
               }}
+              className="sm:text-xs sm:px-3 sm:py-1.5 sm:rounded-lg"
             >
               {name}
             </button>
@@ -672,32 +673,34 @@ export default function TimezoneClock() {
             backgroundColor: theme.cardBg,
             border: `1px solid ${theme.cardBorder}`,
             borderRadius: '20px',
-            padding: '4px',
+            padding: '3px',
             cursor: 'pointer',
-            width: '60px',
+            width: '50px',
             position: 'relative',
             transition: 'all 0.3s ease'
           }}
+          className="sm:w-[60px] sm:p-1"
         >
           <div
             style={{
-              width: '24px',
-              height: '24px',
+              width: '20px',
+              height: '20px',
               borderRadius: '50%',
               backgroundColor: theme.buttonPrimaryBg,
-              transform: mode === 'dark' ? 'translateX(28px)' : 'translateX(0)',
+              transform: mode === 'dark' ? 'translateX(24px)' : 'translateX(0)',
               transition: 'transform 0.3s ease'
             }}
+            className="sm:w-6 sm:h-6"
           />
         </button>
         </div>
       </div>
 
       {/* Controls Section */}
-      <div className="flex justify-center gap-4 items-center px-8 py-4 border-b" style={{ borderColor: theme.cardBorder }}>
-        <div>
+      <div className="flex justify-center gap-2 sm:gap-4 items-center px-4 sm:px-8 py-3 sm:py-4 border-b overflow-x-auto" style={{ borderColor: theme.cardBorder }}>
+        <div className="flex-shrink-0">
           <label
-            className="text-xs block mb-1"
+            className="text-xs block mb-1 whitespace-nowrap"
             style={{ color: theme.textSecondary }}
           >
             Outer Ring
@@ -705,13 +708,13 @@ export default function TimezoneClock() {
           <select
             value={ringAssignments.outer}
             onChange={(e) => handleRingChange('outer', e.target.value as Timezone)}
-            className="text-sm"
+            className="text-xs sm:text-sm"
             style={{
               border: `1px solid ${theme.inputBorder}`,
               backgroundColor: theme.inputBg,
               color: theme.textPrimary,
               borderRadius: '6px',
-              padding: '4px 8px',
+              padding: '4px 6px',
               cursor: 'pointer'
             }}
           >
@@ -721,9 +724,9 @@ export default function TimezoneClock() {
           </select>
         </div>
 
-        <div>
+        <div className="flex-shrink-0">
           <label
-            className="text-xs block mb-1"
+            className="text-xs block mb-1 whitespace-nowrap"
             style={{ color: theme.textSecondary }}
           >
             Middle Ring
@@ -731,13 +734,13 @@ export default function TimezoneClock() {
           <select
             value={ringAssignments.middle}
             onChange={(e) => handleRingChange('middle', e.target.value as Timezone)}
-            className="text-sm"
+            className="text-xs sm:text-sm"
             style={{
               border: `1px solid ${theme.inputBorder}`,
               backgroundColor: theme.inputBg,
               color: theme.textPrimary,
               borderRadius: '6px',
-              padding: '4px 8px',
+              padding: '4px 6px',
               cursor: 'pointer'
             }}
           >
@@ -747,9 +750,9 @@ export default function TimezoneClock() {
           </select>
         </div>
 
-        <div>
+        <div className="flex-shrink-0">
           <label
-            className="text-xs block mb-1"
+            className="text-xs block mb-1 whitespace-nowrap"
             style={{ color: theme.textSecondary }}
           >
             Inner Ring
@@ -757,13 +760,13 @@ export default function TimezoneClock() {
           <select
             value={ringAssignments.inner}
             onChange={(e) => handleRingChange('inner', e.target.value as Timezone)}
-            className="text-sm"
+            className="text-xs sm:text-sm"
             style={{
               border: `1px solid ${theme.inputBorder}`,
               backgroundColor: theme.inputBg,
               color: theme.textPrimary,
               borderRadius: '6px',
-              padding: '4px 8px',
+              padding: '4px 6px',
               cursor: 'pointer'
             }}
           >
@@ -775,10 +778,10 @@ export default function TimezoneClock() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex items-center justify-center gap-8 px-8 py-8 overflow-auto">
+      <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-4 sm:gap-8 px-4 sm:px-8 py-4 sm:py-8 overflow-auto">
         {/* Clock */}
-        <div className="flex-shrink-0">
-          <svg width="600" height="600" viewBox="0 0 400 400" className="drop-shadow-lg">
+        <div className="flex-shrink-0 w-full max-w-[400px] lg:max-w-none">
+          <svg width="100%" height="auto" viewBox="0 0 400 400" className="drop-shadow-lg" style={{ maxWidth: '600px', margin: '0 auto', display: 'block' }}>
         <circle
           cx="200"
           cy="200"
@@ -872,31 +875,31 @@ export default function TimezoneClock() {
         </div>
 
         {/* Info Panels */}
-        <div className="flex flex-col gap-4 w-full max-w-md">
+        <div className="flex flex-col gap-3 sm:gap-4 w-full max-w-md px-2 sm:px-0">
           {/* Overlap Summary */}
           <div
-            className="p-4"
+            className="p-3 sm:p-4"
             style={{
               backgroundColor: theme.successBg,
               border: `1px solid ${theme.successBorder}`,
-              borderRadius: '12px',
+              borderRadius: '8px',
               transition: 'all 0.3s ease'
             }}
           >
             <h3
-              className="font-semibold text-sm mb-2"
+              className="font-semibold text-xs sm:text-sm mb-1 sm:mb-2"
               style={{ color: theme.successTextDark }}
             >
               Full Overlap: {overlapSlots.length} hours available
             </h3>
             <p
-              className="text-xs"
+              className="text-xs break-words"
               style={{ color: theme.successText }}
             >
               {overlapSlots.map(h => `${String(h).padStart(2,'0')}:00`).join(', ')} {ringAssignments.outer.charAt(0).toUpperCase() + ringAssignments.outer.slice(1)}
             </p>
             <p
-              className="text-xs mt-2"
+              className="text-xs mt-1 sm:mt-2"
               style={{ color: theme.successText }}
             >
               {meetingsInOverlap.length} meetings in overlap window
@@ -905,16 +908,16 @@ export default function TimezoneClock() {
 
           {meetingsOutsideOverlap.length > 0 && (
             <div
-              className="p-4"
+              className="p-3 sm:p-4"
               style={{
                 backgroundColor: theme.warningBg,
                 border: `1px solid ${theme.warningBorder}`,
-                borderRadius: '12px',
+                borderRadius: '8px',
                 transition: 'all 0.3s ease'
               }}
             >
               <h3
-                className="font-semibold text-sm mb-3"
+                className="font-semibold text-xs sm:text-sm mb-2 sm:mb-3"
                 style={{ color: theme.warningTextDark }}
               >
                 ⚠ Meetings Outside Overlap
@@ -924,13 +927,13 @@ export default function TimezoneClock() {
                 return (
                   <div
                     key={m.id}
-                    className="flex items-center justify-between text-sm py-2"
+                    className="flex items-center justify-between text-xs sm:text-sm py-1.5 sm:py-2 gap-2"
                     style={{ color: theme.warningText }}
                   >
-                    <span>{m.title} — {String(Math.floor(outerHour)).padStart(2,'0')}:00 {ringAssignments.outer.slice(0, 3).toUpperCase()}</span>
+                    <span className="truncate">{m.title} — {String(Math.floor(outerHour)).padStart(2,'0')}:00 {ringAssignments.outer.slice(0, 3).toUpperCase()}</span>
                     <button
                       onClick={() => removeMeeting(m.id)}
-                      className="text-xs"
+                      className="text-xs flex-shrink-0"
                       style={{ color: theme.warningTextDark, cursor: 'pointer' }}
                     >
                       Remove
@@ -943,16 +946,16 @@ export default function TimezoneClock() {
 
           {selectedSlot && (
             <div
-              className="p-4"
+              className="p-3 sm:p-4"
               style={{
                 backgroundColor: theme.cardBg,
                 border: `1px solid ${theme.cardBorder}`,
-                borderRadius: '12px',
+                borderRadius: '8px',
                 transition: 'all 0.3s ease'
               }}
             >
           <h3
-            className="font-semibold mb-1"
+            className="font-semibold text-xs sm:text-sm mb-1"
             style={{ color: theme.textPrimary }}
           >
             {String(Math.floor(selectedSlot.londonHour)).padStart(2, '0')}:00 LON = {String(Math.floor(selectedSlot.connecticutHour)).padStart(2, '0')}:00 CT = {String(Math.floor(selectedSlot.dallasHour)).padStart(2, '0')}:00 DAL
@@ -961,14 +964,14 @@ export default function TimezoneClock() {
             const outerHour = getTimezoneHour(selectedSlot.utcHour, ringAssignments.outer);
             return isFullOverlap(outerHour, ringAssignments.outer) ? (
               <p
-                className="text-sm mb-3"
+                className="text-xs sm:text-sm mb-2 sm:mb-3"
                 style={{ color: theme.successText }}
               >
                 ✓ All three cities in working hours — ideal!
               </p>
             ) : (
               <p
-                className="text-sm mb-3"
+                className="text-xs sm:text-sm mb-2 sm:mb-3"
                 style={{ color: theme.warningText }}
               >
                 ⚠ {[
@@ -983,15 +986,15 @@ export default function TimezoneClock() {
           {meetings.filter(m => m.utcHour === selectedSlot.utcHour).map(m => (
             <div
               key={m.id}
-              className="flex items-center justify-between p-2 rounded mb-2"
+              className="flex items-center justify-between p-2 rounded mb-1.5 sm:mb-2 gap-2"
               style={{
                 backgroundColor: theme.background,
                 border: `1px solid ${theme.cardBorder}`
               }}
             >
-              <span className="text-sm flex items-center gap-2" style={{ color: theme.textPrimary }}>
+              <span className="text-xs sm:text-sm flex items-center gap-2 truncate" style={{ color: theme.textPrimary }}>
                 <span
-                  className="w-2 h-2 rounded-full"
+                  className="w-2 h-2 rounded-full flex-shrink-0"
                   style={{
                     backgroundColor: m.essential ? theme.meetingEssential : theme.meetingNonEssential
                   }}
@@ -1000,7 +1003,7 @@ export default function TimezoneClock() {
               </span>
               <button
                 onClick={() => removeMeeting(m.id)}
-                className="text-xs"
+                className="text-xs flex-shrink-0"
                 style={{ color: theme.warningText }}
               >
                 ✕
@@ -1022,11 +1025,11 @@ export default function TimezoneClock() {
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = theme.buttonPrimaryBg;
             }}
-            className="mt-2 px-4 py-2 text-sm w-full"
+            className="mt-2 px-3 sm:px-4 py-2 text-xs sm:text-sm w-full"
             style={{
               backgroundColor: theme.buttonPrimaryBg,
               color: theme.buttonPrimaryText,
-              borderRadius: '8px',
+              borderRadius: '6px',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease'
