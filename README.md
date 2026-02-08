@@ -2,7 +2,7 @@
 
 A circular 24-hour clock visualization showing timezone overlaps between Dallas, Connecticut, and London.
 
-![Timezone Meeting Clock](screenshot.png)
+Demo WASM app: https://gustavmaskowitz.github.io/24hourclock/
 
 ## Features
 
@@ -14,7 +14,7 @@ A circular 24-hour clock visualization showing timezone overlaps between Dallas,
 - **Light/Dark mode** - toggle between light and dark color schemes
 - **Meeting management** - track meetings and see overlap windows
 
-## Run the App
+## Run the TypeScript App
 
 ```bash
 # Install dependencies
