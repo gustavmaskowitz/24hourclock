@@ -25,3 +25,8 @@ dist-ssr
 
 # Claude Code
 .claude/
+
+
+# Added by cargo
+
+/target

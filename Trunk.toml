@@ -1,0 +1,11 @@
+[build]
+target = "index.html"
+dist = "dist"
+public_url = "/24hourclock/"
+
+[watch]
+ignore = ["./target", "./dist"]
+
+[serve]
+port = 5173
+open = false

@@ -1,0 +1,46 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+svg path:hover {
+  filter: brightness(0.95);
+  transition: filter 0.15s ease;
+}
+
+svg path {
+  transition: filter 0.15s ease;
+}
+
+select {
+  font-family: inherit;
+}
+
+input[type="text"] {
+  font-family: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+.drop-shadow-lg {
+  filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.04)) drop-shadow(0 4px 3px rgb(0 0 0 / 0.1));
+}
+
+@media (max-width: 768px) {
+  .header-bar {
+    padding: 8px 16px !important;
+  }
+
+  .header-bar h1 {
+    font-size: 1.2rem !important;
+  }
+}
