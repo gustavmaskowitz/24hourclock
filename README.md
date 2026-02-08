@@ -14,14 +14,28 @@ Demo WASM app: https://gustavmaskowitz.github.io/24hourclock/
 - **Light/Dark mode** - toggle between light and dark color schemes
 - **Meeting management** - track meetings and see overlap windows
 
-## Run the TypeScript App
+## Running Locally
+
+Built with **Rust + WebAssembly** using the [Leptos](https://leptos.dev/) framework and [Trunk](https://trunkrs.dev/) build tool.
+
+### Prerequisites
+
+- [Rust](https://rustup.rs/) (stable)
+- WASM target: `rustup target add wasm32-unknown-unknown`
+- Trunk: `cargo install trunk`
+
+### Dev server
 
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+trunk serve
 ```
 
-The app will be available at http://localhost:5173
+Opens at http://localhost:5173
+
+### Production build
+
+```bash
+trunk build --release
+```
+
+Output goes to `dist/`.
