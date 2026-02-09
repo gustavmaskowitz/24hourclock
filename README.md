@@ -30,7 +30,7 @@ Built with **Rust + WebAssembly** using the [Leptos](https://leptos.dev/) framew
 trunk serve
 ```
 
-Opens at http://localhost:5173
+Opens at [http://localhost:5173/24hourclock/](http://localhost:5173/24hourclock/)
 
 ### Production build
 
