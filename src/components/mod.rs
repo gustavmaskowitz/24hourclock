@@ -7,5 +7,5 @@ pub mod info_panels;
 pub mod slot_detail;
 
 pub use clock::Clock;
-pub use controls::{Header, RingControls};
+pub use controls::{Header, TimezoneConfigurator};
 pub use info_panels::InfoPanels;
