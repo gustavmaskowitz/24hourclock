@@ -1,6 +1,6 @@
 # 24-Hour Clock
 
-A circular 24-hour clock visualization showing timezone overlaps between Dallas, Connecticut, and London.
+A circular 24-hour clock visualization showing timezone overlaps between up to 5 timezones you choose e.g. Dallas, Connecticut, and London.
 
 Demo WASM app: https://gustavmaskowitz.github.io/24hourclock/
 
