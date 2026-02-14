@@ -1,33 +1,24 @@
-use super::types::{Timezone, WORK_START, WORK_END};
+use crate::modules::types::{TimezoneEntry, WORK_START, WORK_END};
 
-/// Convert UTC hour to specific timezone
-pub fn get_timezone_hour(utc_hour: f64, tz: Timezone) -> f64 {
-    (utc_hour + tz.offset() as f64 + 24.0) % 24.0
+/// Convert UTC hour to local time given UTC offset
+pub fn utc_to_local(utc_hour: f64, utc_offset: f64) -> f64 {
+    (utc_hour + utc_offset + 48.0) % 24.0
 }
 
-/// Convert hour from one timezone to another
-pub fn convert_timezone(hour: f64, from: Timezone, to: Timezone) -> f64 {
-    let utc = (hour - from.offset() as f64 + 24.0) % 24.0;
-    get_timezone_hour(utc, to)
+/// Convert local hour from one timezone offset to another
+pub fn convert_between(hour: f64, from_offset: f64, to_offset: f64) -> f64 {
+    let utc = (hour - from_offset + 48.0) % 24.0;
+    utc_to_local(utc, to_offset)
 }
 
 /// Check if hour is within work hours (9:00-18:00)
-/// Uses raw float comparison to match original TypeScript behavior exactly
 pub fn is_work_hour(hour: f64) -> bool {
     hour >= WORK_START && hour < WORK_END
 }
 
-/// Check if target timezone is working at the given reference hour
-pub fn is_timezone_working(ref_hour: f64, ref_tz: Timezone, target_tz: Timezone) -> bool {
-    let target_hour = convert_timezone(ref_hour, ref_tz, target_tz);
-    is_work_hour(target_hour)
-}
-
-/// Check if all three timezones are working simultaneously
-pub fn is_full_overlap(ref_hour: f64, ref_tz: Timezone) -> bool {
-    Timezone::ALL
-        .iter()
-        .all(|&tz| is_timezone_working(ref_hour, ref_tz, tz))
+/// Check if all timezones in the list are simultaneously in working hours at the given UTC hour
+pub fn is_full_overlap_utc(utc_hour: f64, zones: &[TimezoneEntry]) -> bool {
+    zones.iter().all(|tz| is_work_hour(utc_to_local(utc_hour, tz.utc_offset)))
 }
 
 /// Get current UTC hour as fractional (e.g. 14.5 = 14:30)
@@ -41,17 +32,19 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_timezone_hour() {
+    fn test_utc_to_local() {
         // UTC 16:00 in Dallas (UTC-6) = 10:00
-        assert_eq!(get_timezone_hour(16.0, Timezone::Dallas), 10.0);
+        assert_eq!(utc_to_local(16.0, -6.0), 10.0);
         // UTC 16:00 in London (UTC+0) = 16:00
-        assert_eq!(get_timezone_hour(16.0, Timezone::London), 16.0);
+        assert_eq!(utc_to_local(16.0, 0.0), 16.0);
+        // UTC 16:00 in India (UTC+5.5) = 21.5
+        assert_eq!(utc_to_local(16.0, 5.5), 21.5);
     }
 
     #[test]
-    fn test_convert_timezone() {
+    fn test_convert_between() {
         // Dallas 10:00 = UTC 16:00 = London 16:00
-        let london_hour = convert_timezone(10.0, Timezone::Dallas, Timezone::London);
+        let london_hour = convert_between(10.0, -6.0, 0.0);
         assert_eq!(london_hour, 16.0);
     }
 

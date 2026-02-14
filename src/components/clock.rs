@@ -9,14 +9,16 @@ pub fn Clock(
     meetings: ReadSignal<Vec<Meeting>>,
     set_selected_slot: WriteSignal<Option<SelectedSlot>>,
     current_utc: ReadSignal<f64>,
-    ring_assignments: ReadSignal<RingAssignments>,
+    active_zones: ReadSignal<ActiveTimezones>,
     theme: Signal<&'static ThemeColors>,
 ) -> impl IntoView {
     view! {
         {move || {
             let t = *theme.get();
-            let assignments = ring_assignments.get();
-            let ref_tz = assignments.outer;
+            let zones = active_zones.get();
+            let n = zones.zones.len();
+            let geos = compute_ring_geometries(n);
+            let ref_offset = zones.zones[0].utc_offset;
 
             view! {
                 <svg
@@ -29,60 +31,44 @@ pub fn Clock(
                     // Background circle
                     <circle cx=CX cy=CY r=BG_R fill=t.svg_bg stroke=t.svg_border stroke-width="2" />
 
-                    // Outer ring segments
-                    {(0u32..24).map(|h| view! {
-                        <ClockSegment
-                            hour=h
-                            outer_r=OUTER_OUTER_R
-                            inner_r=OUTER_INNER_R
-                            ring_tz=assignments.outer
-                            reference_tz=ref_tz
-                            theme=t
-                            meetings=meetings
-                            set_selected=set_selected_slot
-                            is_outer_ring=true
-                        />
+                    // Render all ring segments dynamically
+                    {geos.iter().enumerate().flat_map(|(ring_idx, geo)| {
+                        let tz = &zones.zones[ring_idx];
+                        let tz_offset = tz.utc_offset;
+                        let zones_clone = zones.zones.clone();
+                        let outer_r = geo.outer_r;
+                        let inner_r = geo.inner_r;
+                        (0u32..24).map(move |h| {
+                            let zones_for_segment = zones_clone.clone();
+                            view! {
+                                <ClockSegment
+                                    hour=h
+                                    outer_r=outer_r
+                                    inner_r=inner_r
+                                    ring_index=ring_idx
+                                    tz_offset=tz_offset
+                                    ref_offset=ref_offset
+                                    theme=t
+                                    meetings=meetings
+                                    set_selected=set_selected_slot
+                                    active_zones=zones_for_segment
+                                />
+                            }
+                        }).collect::<Vec<_>>()
                     }).collect_view()}
 
-                    // Middle ring segments
-                    {(0u32..24).map(|h| view! {
-                        <ClockSegment
-                            hour=h
-                            outer_r=MIDDLE_OUTER_R
-                            inner_r=MIDDLE_INNER_R
-                            ring_tz=assignments.middle
-                            reference_tz=ref_tz
-                            theme=t
-                            meetings=meetings
-                            set_selected=set_selected_slot
-                            is_outer_ring=false
-                        />
+                    // Ring dividers (N-1 dashed circles)
+                    {geos.iter().take(n.saturating_sub(1)).map(|geo| {
+                        view! {
+                            <circle cx=CX cy=CY r=geo.inner_r fill="none" stroke=t.ring_divider stroke-width="1" stroke-dasharray="2,2" />
+                        }
                     }).collect_view()}
-
-                    // Inner ring segments
-                    {(0u32..24).map(|h| view! {
-                        <ClockSegment
-                            hour=h
-                            outer_r=INNER_OUTER_R
-                            inner_r=INNER_INNER_R
-                            ring_tz=assignments.inner
-                            reference_tz=ref_tz
-                            theme=t
-                            meetings=meetings
-                            set_selected=set_selected_slot
-                            is_outer_ring=false
-                        />
-                    }).collect_view()}
-
-                    // Ring dividers
-                    <circle cx=CX cy=CY r=OUTER_INNER_R fill="none" stroke=t.ring_divider stroke-width="1" stroke-dasharray="2,2" />
-                    <circle cx=CX cy=CY r=MIDDLE_INNER_R fill="none" stroke=t.ring_divider stroke-width="1" stroke-dasharray="2,2" />
 
                     // Now highlight
-                    <NowHighlight current_utc=current_utc ring_assignments=ring_assignments theme=t />
+                    <NowHighlight current_utc=current_utc active_zones=active_zones theme=t />
 
                     // Center display
-                    <CenterDisplay current_utc=current_utc ring_assignments=ring_assignments theme=t />
+                    <CenterDisplay current_utc=current_utc active_zones=active_zones theme=t />
                 </svg>
             }
         }}

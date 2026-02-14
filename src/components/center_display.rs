@@ -4,53 +4,56 @@ use crate::modules::*;
 #[component]
 pub fn CenterDisplay(
     current_utc: ReadSignal<f64>,
-    ring_assignments: ReadSignal<RingAssignments>,
+    active_zones: ReadSignal<ActiveTimezones>,
     theme: ThemeColors,
 ) -> impl IntoView {
-    let minutes = move || {
-        let now = js_sys::Date::new_0();
-        format!("{:02}", now.get_utc_minutes())
-    };
-
-    let outer_time = move || {
-        let a = ring_assignments.get();
-        let h = get_timezone_hour(current_utc.get(), a.outer);
-        format!("{:02}:{} {}", h.floor() as u32, minutes(), a.outer.short_name())
-    };
-
-    let middle_time = move || {
-        let a = ring_assignments.get();
-        let h = get_timezone_hour(current_utc.get(), a.middle);
-        format!("{:02}:{} {}", h.floor() as u32, minutes(), a.middle.short_name())
-    };
-
-    let inner_time = move || {
-        let a = ring_assignments.get();
-        let h = get_timezone_hour(current_utc.get(), a.inner);
-        format!("{:02}:{} {}", h.floor() as u32, minutes(), a.inner.short_name())
-    };
-
     let center_bg = theme.center_circle_bg;
     let text_muted = theme.text_muted;
-    let text_outer = theme.clock_text_outer;
-    let text_middle = theme.clock_text_middle;
-    let text_inner = theme.clock_text_inner;
 
     view! {
-        <g>
-            <circle cx=CX cy=CY r=CENTER_R fill=center_bg stroke="#ec4899" stroke-width="3" />
-            <text x=CX y={CY - 22.0} text-anchor="middle" font-size="9" fill=text_muted>
-                "NOW"
-            </text>
-            <text x=CX y={CY - 4.0} text-anchor="middle" font-size="11" font-weight="600" fill=text_outer>
-                {outer_time}
-            </text>
-            <text x=CX y={CY + 10.0} text-anchor="middle" font-size="11" font-weight="600" fill=text_middle>
-                {middle_time}
-            </text>
-            <text x=CX y={CY + 24.0} text-anchor="middle" font-size="11" font-weight="600" fill=text_inner>
-                {inner_time}
-            </text>
-        </g>
+        {move || {
+            let zones = active_zones.get();
+            let n = zones.zones.len();
+            let now = js_sys::Date::new_0();
+            let utc_min = now.get_utc_minutes() as f64;
+            let utc_hour = current_utc.get();
+
+            let first_y = CY - 8.0;
+            let last_y = CY + 28.0;
+            let spacing = if n > 1 { (last_y - first_y) / (n as f64 - 1.0) } else { 0.0 };
+            let font_size = if n <= 3 { 11 } else if n == 4 { 9 } else { 8 };
+
+            let time_lines: Vec<_> = zones.zones.iter().enumerate().map(|(i, tz)| {
+                let h = utc_to_local(utc_hour, tz.utc_offset);
+                let hour_part = h.floor() as u32 % 24;
+                let frac = tz.utc_offset % 1.0;
+                let display_mins = if frac.abs() < 0.01 {
+                    format!("{:02}", utc_min as u32)
+                } else {
+                    let local_min = (utc_min + frac * 60.0 + 60.0) % 60.0;
+                    format!("{:02}", local_min.floor() as u32)
+                };
+                let text = format!("{:02}:{} {}", hour_part, display_mins, tz.short_name);
+                let color = theme.ring_text_colors[i.min(4)];
+                let y = if n == 1 { CY + 6.0 } else { first_y + spacing * i as f64 };
+                (text, color, y)
+            }).collect();
+
+            view! {
+                <g>
+                    <circle cx=CX cy=CY r=CENTER_R fill=center_bg stroke="#ec4899" stroke-width="3" />
+                    <text x=CX y={CY - 22.0} text-anchor="middle" font-size="9" fill=text_muted>
+                        "NOW"
+                    </text>
+                    {time_lines.into_iter().map(|(text, color, y)| {
+                        view! {
+                            <text x=CX y=y text-anchor="middle" font-size=font_size font-weight="600" fill=color>
+                                {text}
+                            </text>
+                        }
+                    }).collect_view()}
+                </g>
+            }
+        }}
     }
 }

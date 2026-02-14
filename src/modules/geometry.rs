@@ -36,3 +36,19 @@ pub fn label_position(cx: f64, cy: f64, outer_r: f64, inner_r: f64, hour: f64) -
     let label_r = (outer_r + inner_r) / 2.0;
     polar_to_cartesian(cx, cy, label_r, mid_angle)
 }
+
+use crate::modules::types::{BG_R, CENTER_R, CENTER_GAP, RING_GAP, RingGeometry};
+
+/// Calculate ring geometries for N rings (1..=5).
+/// Distributes available radial space evenly with gaps between rings.
+pub fn compute_ring_geometries(n: usize) -> Vec<RingGeometry> {
+    let available = BG_R - CENTER_R - CENTER_GAP; // 196 - 54 - 16 = 126
+    let total_gap = RING_GAP * (n as f64 - 1.0);
+    let thickness = (available - total_gap) / n as f64;
+
+    (0..n).map(|i| {
+        let outer_r = BG_R - RING_GAP - (i as f64 * (thickness + RING_GAP));
+        let inner_r = outer_r - thickness;
+        RingGeometry { outer_r, inner_r }
+    }).collect()
+}

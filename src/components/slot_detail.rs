@@ -6,7 +6,7 @@ pub fn SlotDetail(
     selected_slot: ReadSignal<Option<SelectedSlot>>,
     meetings: ReadSignal<Vec<Meeting>>,
     set_meetings: WriteSignal<Vec<Meeting>>,
-    ring_assignments: ReadSignal<RingAssignments>,
+    active_zones: ReadSignal<ActiveTimezones>,
     theme: Signal<&'static ThemeColors>,
 ) -> impl IntoView {
     let (new_title, set_new_title) = signal(String::new());
@@ -16,26 +16,30 @@ pub fn SlotDetail(
         {move || {
             let slot = selected_slot.get()?;
             let t = *theme.get();
-            let a = ring_assignments.get();
+            let z = active_zones.get();
 
-            let time_label = format!(
-                "{:02}:00 LON = {:02}:00 CT = {:02}:00 DAL",
-                slot.london_hour.floor() as u32,
-                slot.connecticut_hour.floor() as u32,
-                slot.dallas_hour.floor() as u32,
-            );
+            // Build time label dynamically
+            let time_label = slot.local_hours.iter().zip(z.zones.iter()).map(|(h, tz)| {
+                let hour_part = h.floor() as u32 % 24;
+                let frac = tz.utc_offset % 1.0;
+                if frac.abs() < 0.01 {
+                    format!("{:02}:00 {}", hour_part, tz.short_name)
+                } else {
+                    let mins = (frac.abs() * 60.0).round() as u32;
+                    format!("{:02}:{:02} {}", hour_part, mins, tz.short_name)
+                }
+            }).collect::<Vec<_>>().join(" = ");
 
-            let outer_hour = get_timezone_hour(slot.utc_hour as f64, a.outer);
-            let full_overlap = is_full_overlap(outer_hour, a.outer);
+            // Check overlap
+            let full_overlap = is_full_overlap_utc(slot.utc_hour as f64, &z.zones);
 
             let overlap_msg = if full_overlap {
-                (format!("\u{2713} All three cities in working hours \u{2014} ideal!"), t.success_text)
+                (format!("\u{2713} All timezones in working hours \u{2014} ideal!"), t.success_text)
             } else {
-                let outside: Vec<&str> = [
-                    (!is_timezone_working(outer_hour, a.outer, Timezone::London)).then_some("London"),
-                    (!is_timezone_working(outer_hour, a.outer, Timezone::Connecticut)).then_some("Connecticut"),
-                    (!is_timezone_working(outer_hour, a.outer, Timezone::Dallas)).then_some("Dallas"),
-                ].into_iter().flatten().collect();
+                let outside: Vec<&str> = z.zones.iter().filter_map(|tz| {
+                    let local = utc_to_local(slot.utc_hour as f64, tz.utc_offset);
+                    if !is_work_hour(local) { Some(tz.name) } else { None }
+                }).collect();
                 (format!("\u{26A0} {} outside working hours", outside.join(", ")), t.warning_text)
             };
 
@@ -101,7 +105,7 @@ pub fn SlotDetail(
                                 prop:checked=move || new_essential.get()
                                 on:change=move |ev| set_new_essential.set(event_target_checked(&ev))
                             />
-                            "Essential for cross-city collaboration?"
+                            "Essential for cross-timezone collaboration?"
                         </label>
                         <button
                             style=format!(
